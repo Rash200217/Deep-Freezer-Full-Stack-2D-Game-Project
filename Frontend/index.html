@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Deep Freezer</title>
+    <style>
+      body, html {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #222;
+        color: white;
+        font-family: sans-serif;
+        overflow: hidden;
+        image-rendering: pixelated;
+      }
+      canvas {
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+      }
+      #app {
+        position: relative;
+      }
+      #ui-layer {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none; /* Let clicks pass through to game */
+      }
+      .panel {
+        pointer-events: auto; /* Catch clicks in UI panels */
+      }
+    </style>
+  </head>
+  <body>
+    <!-- The Phaser Game Canvas will be injected into #app -->
+    <div id="app">
+      <!-- We can place overlay UI here, like login/leaderboard -->
+      <div id="ui-layer"></div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

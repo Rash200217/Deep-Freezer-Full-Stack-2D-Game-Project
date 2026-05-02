@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Deep Freezer — Admin Console</title>
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg:     #04040f;
+      --panel:  #080820;
+      --border: #1a1a55;
+      --cyan:   #00fff7;
+      --pink:   #ff2d78;
+      --yellow: #ffe600;
+      --green:  #39ff14;
+      --orange: #ff8c00;
+      --purple: #bf5fff;
+      --red:    #ff3333;
+      --muted:  #8A9BB2;
+      --text-primary: #F4F8FA;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text-primary);
+      font-family: 'VT323', monospace;
+      font-size: 18px;
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* ─── SIDEBAR ─────────────────────────────────────────────── */
+    .sidebar {
+      width: 220px; min-height: 100vh;
+      background: #050515;
+      border-right: 2px solid var(--border);
+      display: flex; flex-direction: column;
+      flex-shrink: 0;
+      position: sticky; top: 0; height: 100vh; overflow: hidden;
+    }
+
+    .sidebar-logo {
+      padding: 20px 16px;
+      border-bottom: 2px solid var(--border);
+      text-align: center;
+    }
+    .sidebar-logo .icon { font-size: 36px; display: block; margin-bottom: 6px; }
+    .sidebar-logo h1 {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 9px; color: var(--yellow);
+      text-shadow: 0 0 8px var(--yellow);
+      line-height: 1.6;
+    }
+    .sidebar-logo .badge {
+      display: inline-block; margin-top: 8px;
+      padding: 3px 8px;
+      background: var(--red); color: #fff;
+      font-family: 'Press Start 2P', monospace; font-size: 7px;
+    }
+
+    .sidebar-user {
+      padding: 12px 16px;
+      border-bottom: 2px solid var(--border);
+      font-size: 14px; color: #666;
+    }
+    .sidebar-user span { color: var(--cyan); font-weight: bold; }
+
+    .nav { flex: 1; padding: 8px 0; }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 18px;
+      cursor: pointer; border: none; background: none; width: 100%;
+      color: var(--muted); font-family: 'VT323', monospace; font-size: 20px;
+      transition: all 0.15s; border-left: 3px solid transparent;
+      text-align: left;
+    }
+    .nav-item:hover { color: var(--cyan); background: rgba(0,255,247,0.04); }
+    .nav-item.active {
+      color: var(--yellow); border-left-color: var(--yellow);
+      background: rgba(255,230,0,0.06);
+      text-shadow: 0 0 6px var(--yellow);
+    }
+    .nav-icon { font-size: 22px; min-width: 26px; text-align: center; }
+    .nav-badge {
+      margin-left: auto; background: var(--pink);
+      color: #fff; font-size: 12px; padding: 1px 6px;
+      font-family: 'Press Start 2P', monospace; font-size: 7px;
+    }
+
+    .sidebar-footer {
+      padding: 14px 16px;
+      border-top: 2px solid var(--border);
+    }
+    .logout-btn {
+      width: 100%; padding: 10px;
+      background: transparent; border: 2px solid var(--pink);
+      color: var(--pink); font-family: 'Press Start 2P', monospace; font-size: 9px;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .logout-btn:hover { background: rgba(255,45,120,0.12); }
+
+    /* ─── MAIN CONTENT ───────────────────────────────────────── */
+    .main {
+      flex: 1; padding: 28px; overflow-y: auto; min-height: 100vh;
+    }
+
+    .page { display: none; }
+    .page.active { display: block; }
+
+    .page-header {
+      display: flex; align-items: center; gap: 14px;
+      margin-bottom: 24px; padding-bottom: 16px;
+      border-bottom: 2px solid var(--border);
+    }
+    .page-icon { font-size: 32px; }
+    .page-title {
+      font-family: 'Press Start 2P', monospace; font-size: 14px;
+      color: var(--cyan); text-shadow: 0 0 8px var(--cyan);
+    }
+    .page-subtitle { color: var(--muted); font-size: 16px; margin-top: 4px; }
+
+    /* Stats cards */
+    .stat-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 16px; margin-bottom: 28px;
+    }
+    .stat-card {
+      background: var(--panel); border: 2px solid var(--border);
+      padding: 18px 16px; text-align: center;
+      transition: border-color 0.2s;
+    }
+    .stat-card:hover { border-color: var(--muted); }
+    .stat-icon { font-size: 32px; margin-bottom: 8px; }
+    .stat-value {
+      font-family: 'Press Start 2P', monospace; font-size: 22px;
+      line-height: 1.2;
+    }
+    .stat-label { color: #aaa; font-size: 15px; margin-top: 4px; font-weight: bold; }
+    .stat-c1 .stat-value { color: var(--cyan); }
+    .stat-c2 .stat-value { color: var(--green); }
+    .stat-c3 .stat-value { color: var(--yellow); }
+    .stat-c4 .stat-value { color: var(--purple); }
+
+    /* Table */
+    .table-wrapper {
+      background: var(--panel); border: 2px solid var(--border); overflow-x: auto;
+    }
+    .table-toolbar {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 16px; border-bottom: 2px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .toolbar-title {
+      font-family: 'Press Start 2P', monospace; font-size: 9px; color: var(--yellow);
+      flex: 1;
+    }
+    .refresh-btn {
+      padding: 7px 14px; background: transparent; border: 1px solid var(--cyan);
+      color: var(--cyan); font-family: 'VT323', monospace; font-size: 18px;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .refresh-btn:hover { background: rgba(0,255,247,0.08); }
+
+    table { width: 100%; border-collapse: collapse; }
+    thead { background: #060618; }
+    th {
+      padding: 10px 14px; text-align: left;
+      font-family: 'Press Start 2P', monospace; font-size: 8px;
+      color: var(--muted); border-bottom: 2px solid var(--border);
+      white-space: nowrap;
+    }
+    td {
+      padding: 10px 14px; border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    tr:hover td { background: rgba(255,255,255,0.02); }
+    .td-mono { font-family: 'Press Start 2P', monospace; font-size: 9px; }
+    .td-muted { color: var(--muted); font-size: 15px; }
+
+    /* Action buttons */
+    .actions { display: flex; gap: 6px; flex-wrap: wrap; }
+    .act-btn {
+      padding: 5px 10px; border: 1px solid; font-family: 'VT323', monospace;
+      font-size: 16px; cursor: pointer; background: transparent;
+      transition: all 0.15s; white-space: nowrap;
+    }
+    .act-btn.danger  { border-color: var(--red);    color: var(--red); }
+    .act-btn.warning { border-color: var(--orange); color: var(--orange); }
+    .act-btn.info    { border-color: var(--cyan);   color: var(--cyan); }
+    .act-btn.success { border-color: var(--green);  color: var(--green); }
+    .act-btn.danger:hover  { background: rgba(255,51,51,0.12); }
+    .act-btn.warning:hover { background: rgba(255,140,0,0.12); }
+    .act-btn.info:hover    { background: rgba(0,255,247,0.08); }
+    .act-btn.success:hover { background: rgba(57,255,20,0.10); }
+
+    /* Badge chips */
+    .chip {
+      display: inline-block; padding: 2px 8px;
+      font-family: 'Press Start 2P', monospace; font-size: 7px;
+    }
+    .chip.admin  { background: rgba(255,45,120,0.2); color: var(--pink); border: 1px solid var(--pink); }
+    .chip.player { background: rgba(57,255,20,0.1);  color: var(--green); border: 1px solid var(--green); }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center; padding: 48px; color: #32CD32; font-size: 18px;
+    }
+    .empty-state .big { font-size: 48px; margin-bottom: 12px; }
+
+    /* Loading */
+    .loader {
+      width: 24px;
+      height: 24px;
+      border: 3px solid rgba(57, 255, 20, 0.1);
+      border-radius: 50%;
+      display: inline-block;
+      border-top-color: var(--green);
+      box-shadow: 0 0 8px var(--green);
+      animation: spin 0.8s linear infinite;
+      vertical-align: middle;
+      margin-right: 10px;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .loading-container { text-align: center; padding: 32px; color: var(--green); font-family: 'Press Start 2P', monospace; font-size: 10px; }
+
+    /* Toast notification */
+    #toast {
+      position: fixed; bottom: 24px; right: 24px; z-index: 10000;
+      padding: 12px 20px; border: 2px solid var(--green); background: #040f04;
+      color: var(--green); font-family: 'Press Start 2P', monospace; font-size: 9px;
+      opacity: 0; pointer-events: none; transition: opacity 0.3s;
+      max-width: 320px;
+    }
+    #toast.show { opacity: 1; }
+    #toast.error { border-color: var(--red); background: #0f0404; color: var(--red); }
+
+    /* Edit modal */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 1000; display: none;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal {
+      background: var(--panel); border: 2px solid var(--yellow);
+      padding: 28px; min-width: 360px; max-width: 90vw;
+      box-shadow: 0 0 30px rgba(255,230,0,0.2);
+    }
+    .modal h2 {
+      font-family: 'Press Start 2P', monospace; font-size: 11px;
+      color: var(--yellow); margin-bottom: 20px;
+    }
+    .modal input {
+      width: 100%; background: #020215; border: 2px solid var(--cyan);
+      color: var(--cyan); font-family: 'VT323', monospace; font-size: 22px;
+      padding: 10px 12px; outline: none; margin-bottom: 16px;
+    }
+    .modal-actions { display: flex; gap: 10px; }
+    .modal-btn {
+      flex: 1; padding: 10px; font-family: 'Press Start 2P', monospace; font-size: 9px;
+      cursor: pointer; border: 2px solid; background: transparent; transition: all 0.15s;
+    }
+    .modal-btn.save   { border-color: var(--green); color: var(--green); }
+    .modal-btn.cancel { border-color: var(--muted); color: var(--muted); }
+    .modal-btn.save:hover   { background: rgba(57,255,20,0.1); }
+    .modal-btn.cancel:hover { background: rgba(255,255,255,0.05); }
+
+    /* Confirm dialog uses same modal */
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <span class="icon">❄️</span>
+    <h1>DEEP FREEZER<br/>ADMIN</h1>
+    <span class="badge">⚡ CONSOLE</span>
+  </div>
+  <div class="sidebar-user">LOGGED IN AS<br/><span id="sb-username">---</span></div>
+
+  <nav class="nav">
+    <button class="nav-item active" onclick="showPage('dashboard')">
+      <span class="nav-icon">📊</span> DASHBOARD
+    </button>
+    <button class="nav-item" onclick="showPage('users')">
+      <span class="nav-icon">👤</span> USERS
+      <span class="nav-badge" id="nb-users">—</span>
+    </button>
+    <button class="nav-item" onclick="showPage('levels')">
+      <span class="nav-icon">🗺</span> LEVELS
+      <span class="nav-badge" id="nb-levels">—</span>
+    </button>
+    <button class="nav-item" onclick="showPage('scores')">
+      <span class="nav-icon">🏆</span> SCORES
+      <span class="nav-badge" id="nb-scores">—</span>
+    </button>
+  </nav>
+
+  <div class="sidebar-footer">
+    <button class="logout-btn" onclick="doLogout()">✖ LOGOUT</button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- DASHBOARD -->
+  <div class="page active" id="page-dashboard">
+    <div class="page-header">
+      <span class="page-icon">📊</span>
+      <div>
+        <div class="page-title">DASHBOARD</div>
+        <div class="page-subtitle">SYSTEM OVERVIEW</div>
+      </div>
+    </div>
+    <div class="stat-grid">
+      <div class="stat-card stat-c1">
+        <div class="stat-icon">👤</div>
+        <div class="stat-value" id="stat-users">—</div>
+        <div class="stat-label">TOTAL USERS</div>
+      </div>
+      <div class="stat-card stat-c2">
+        <div class="stat-icon">🛡</div>
+        <div class="stat-value" id="stat-admins">—</div>
+        <div class="stat-label">ADMINS</div>
+      </div>
+      <div class="stat-card stat-c3">
+        <div class="stat-icon">🗺</div>
+        <div class="stat-value" id="stat-levels">—</div>
+        <div class="stat-label">COMMUNITY MAPS</div>
+      </div>
+      <div class="stat-card stat-c4">
+        <div class="stat-icon">🏆</div>
+        <div class="stat-value" id="stat-scores">—</div>
+        <div class="stat-label">SCORE ENTRIES</div>
+      </div>
+    </div>
+    <div style="color:var(--muted);font-size:15px;margin-top:4px;">
+      ▶ SELECT A SECTION FROM THE SIDEBAR TO MANAGE DATA
+    </div>
+    <div style="margin-top: 24px; padding: 20px; background: var(--panel); border: 2px solid var(--border);">
+      <div style="font-family: 'Press Start 2P', monospace; font-size: 12px; color: var(--cyan); margin-bottom: 20px;">SYSTEM METRICS</div>
+      <canvas id="statsChart" style="width: 100%; max-height: 300px;"></canvas>
+    </div>
+  </div>
+
+  <!-- USERS -->
+  <div class="page" id="page-users">
+    <div class="page-header">
+      <span class="page-icon">👤</span>
+      <div>
+        <div class="page-title">USER MANAGEMENT</div>
+        <div class="page-subtitle">VIEW · PROMOTE · DELETE</div>
+      </div>
+    </div>
+    <div class="table-wrapper">
+      <div class="table-toolbar">
+        <span class="toolbar-title">ALL PLAYERS</span>
+        <button class="refresh-btn" onclick="loadUsers()">⟳ REFRESH</button>
+      </div>
+      <div id="users-body"><div class="loading-container"><div class="loader"></div>LOADING DATA...</div></div>
+    </div>
+  </div>
+
+  <!-- LEVELS -->
+  <div class="page" id="page-levels">
+    <div class="page-header">
+      <span class="page-icon">🗺</span>
+      <div>
+        <div class="page-title">LEVEL MANAGEMENT</div>
+        <div class="page-subtitle">VIEW · RENAME · DELETE</div>
+      </div>
+    </div>
+    <div class="table-wrapper">
+      <div class="table-toolbar">
+        <span class="toolbar-title">COMMUNITY MAPS</span>
+        <button class="refresh-btn" onclick="loadLevels()">⟳ REFRESH</button>
+      </div>
+      <div id="levels-body"><div class="loading-container"><div class="loader"></div>LOADING DATA...</div></div>
+    </div>
+  </div>
+
+  <!-- SCORES -->
+  <div class="page" id="page-scores">
+    <div class="page-header">
+      <span class="page-icon">🏆</span>
+      <div>
+        <div class="page-title">SCORE MANAGEMENT</div>
+        <div class="page-subtitle">VIEW · DELETE</div>
+      </div>
+    </div>
+    <div class="table-wrapper">
+      <div class="table-toolbar">
+        <span class="toolbar-title">ALL SCORE ENTRIES</span>
+        <button class="refresh-btn" onclick="loadScores()">⟳ REFRESH</button>
+      </div>
+      <div id="scores-body"><div class="loading-container"><div class="loader"></div>LOADING DATA...</div></div>
+    </div>
+  </div>
+
+</main>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<!-- Edit Modal -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal">
+    <h2 id="modal-title">EDIT</h2>
+    <input type="text" id="modal-input" placeholder="New name..." />
+    <div class="modal-actions">
+      <button class="modal-btn save"   onclick="modalSave()">💾 SAVE</button>
+      <button class="modal-btn cancel" onclick="modalClose()">✖ CANCEL</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const token = localStorage.getItem('token');
+  const username = localStorage.getItem('username');
+  const isAdmin = localStorage.getItem('isAdmin') === 'true';
+
+  // Guard: redirect if not admin
+  if (!token || !isAdmin) {
+    alert('ACCESS DENIED. ADMINS ONLY.');
+    window.location.href = '/portal.html';
+  }
+
+  document.getElementById('sb-username').textContent = (username || '?').toUpperCase();
+
+  // ─── Page navigation ───────────────────────────────────────────
+  function showPage(name) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+    document.getElementById('page-' + name).classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(b => {
+      if (b.textContent.trim().toLowerCase().includes(name.substring(0,4))) b.classList.add('active');
+    });
+
+    // Lazy load
+    if (name === 'users')  loadUsers();
+    if (name === 'levels') loadLevels();
+    if (name === 'scores') loadScores();
+    if (name === 'dashboard') loadStats();
+  }
+
+  // ─── API helper ────────────────────────────────────────────────
+  async function api(method, path, body) {
+    const res = await fetch('/api/admin/' + path, {
+      method,
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+      body: body ? JSON.stringify(body) : undefined
+    });
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
+  }
+
+  // ─── Toast ─────────────────────────────────────────────────────
+  let toastTimer;
+  function toast(msg, isError = false) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className = 'show' + (isError ? ' error' : '');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.className = '', 3000);
+  }
+
+  // ─── Stats ─────────────────────────────────────────────────────
+  let statsChartInstance = null;
+  async function loadStats() {
+    try {
+      const s = await api('GET', 'stats');
+      document.getElementById('stat-users').textContent  = s.userCount;
+      document.getElementById('stat-admins').textContent = s.adminCount;
+      document.getElementById('stat-levels').textContent = s.levelCount;
+      document.getElementById('stat-scores').textContent = s.scoreCount;
+      document.getElementById('nb-users').textContent  = s.userCount;
+      document.getElementById('nb-levels').textContent = s.levelCount;
+      document.getElementById('nb-scores').textContent = s.scoreCount;
+
+      renderChart(s);
+    } catch { toast('Failed to load stats', true); }
+  }
+
+  function renderChart(s) {
+    const ctx = document.getElementById('statsChart').getContext('2d');
+    if (statsChartInstance) statsChartInstance.destroy();
+
+    Chart.defaults.color = '#ff2d78';
+    Chart.defaults.font.family = "'VT323', monospace";
+    Chart.defaults.font.size = 18;
+
+    statsChartInstance = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['PLAYERS', 'ADMINS', 'LEVELS', 'SCORES'],
+        datasets: [{
+          label: 'Count',
+          data: [s.userCount, s.adminCount, s.levelCount, s.scoreCount],
+          backgroundColor: [
+            'rgba(0, 255, 247, 0.4)',
+            'rgba(57, 255, 20, 0.4)',
+            'rgba(255, 230, 0, 0.4)',
+            'rgba(255, 45, 120, 0.4)'
+          ],
+          borderColor: [
+            '#00fff7',
+            '#39ff14',
+            '#ffe600',
+            '#ff2d78'
+          ],
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: { color: 'rgba(26, 26, 85, 0.5)' },
+            ticks: { stepSize: 1, color: '#00fff7' }
+          },
+          x: {
+            grid: { display: false },
+            ticks: { color: '#00fff7' }
+          }
+        }
+      }
+    });
+  }
+
+  // ─── USERS ─────────────────────────────────────────────────────
+  async function loadUsers() {
+    const el = document.getElementById('users-body');
+    el.innerHTML = '<div class="loading-container"><div class="loader"></div>LOADING...</div>';
+    try {
+      const users = await api('GET', 'users');
+      document.getElementById('nb-users').textContent = users.length;
+      if (!users.length) { el.innerHTML = '<div class="empty-state"><div class="big">👤</div>NO USERS FOUND</div>'; return; }
+      el.innerHTML = `<table>
+        <thead><tr>
+          <th>ID</th><th>USERNAME</th><th>ROLE</th><th>CREATED</th><th>ACTIONS</th>
+        </tr></thead>
+        <tbody>${users.map(u => `
+          <tr>
+            <td class="td-mono td-muted">#${u.id}</td>
+            <td class="td-mono">${esc(u.username)}</td>
+            <td><span class="chip ${u.isAdmin ? 'admin' : 'player'}">${u.isAdmin ? '⚡ ADMIN' : '▶ PLAYER'}</span></td>
+            <td class="td-muted">${u.createdAt || '—'}</td>
+            <td><div class="actions">
+              <button class="act-btn warning" onclick="toggleAdmin(${u.id}, '${esc(u.username)}')">
+                ${u.isAdmin ? '▽ DEMOTE' : '△ PROMOTE'}
+              </button>
+              <button class="act-btn danger" onclick="deleteUser(${u.id}, '${esc(u.username)}')">🗑 DELETE</button>
+            </div></td>
+          </tr>`).join('')}
+        </tbody></table>`;
+    } catch (e) { el.innerHTML = `<div class="empty-state"><div class="big">⚠</div>LOAD FAILED</div>`; toast(e.message, true); }
+  }
+
+  async function toggleAdmin(id, name) {
+    if (!confirm(`Change admin status for "${name}"?`)) return;
+    try {
+      const r = await api('PATCH', `users/${id}/toggle-admin`);
+      toast(`✔ ${name} is now ${r.isAdmin ? 'ADMIN' : 'PLAYER'}`);
+      loadUsers(); loadStats();
+    } catch (e) { toast(e.message, true); }
+  }
+
+  async function deleteUser(id, name) {
+    if (!confirm(`DELETE user "${name}"? This cannot be undone.`)) return;
+    try {
+      await api('DELETE', `users/${id}`);
+      toast(`✔ User "${name}" deleted`);
+      loadUsers(); loadStats();
+    } catch (e) { toast(e.message, true); }
+  }
+
+  // ─── LEVELS ────────────────────────────────────────────────────
+  async function loadLevels() {
+    const el = document.getElementById('levels-body');
+    el.innerHTML = '<div class="loading-container"><div class="loader"></div>LOADING...</div>';
+    try {
+      const levels = await api('GET', 'levels');
+      document.getElementById('nb-levels').textContent = levels.length;
+      if (!levels.length) { el.innerHTML = '<div class="empty-state"><div class="big">🗺</div>NO MAPS YET</div>'; return; }
+      el.innerHTML = `<table>
+        <thead><tr>
+          <th>ID</th><th>MAP NAME</th><th>AUTHOR</th><th>PLAYS</th><th>CREATED</th><th>ACTIONS</th>
+        </tr></thead>
+        <tbody>${levels.map(l => `
+          <tr>
+            <td class="td-mono td-muted">#${l.id}</td>
+            <td class="td-mono">${esc(l.name)}</td>
+            <td class="td-muted">${esc(l.authorName)}</td>
+            <td class="td-mono" style="color:var(--yellow)">${l.playCount}</td>
+            <td class="td-muted">${l.createdAt || '—'}</td>
+            <td><div class="actions">
+              <button class="act-btn info" onclick="editLevel(${l.id}, '${esc(l.name)}')">✏ RENAME</button>
+              <button class="act-btn danger" onclick="deleteLevel(${l.id}, '${esc(l.name)}')">🗑 DELETE</button>
+            </div></td>
+          </tr>`).join('')}
+        </tbody></table>`;
+    } catch (e) { el.innerHTML = `<div class="empty-state"><div class="big">⚠</div>LOAD FAILED</div>`; toast(e.message, true); }
+  }
+
+  // Modal for renaming
+  let _modalCallback = null;
+  function editLevel(id, name) {
+    document.getElementById('modal-title').textContent = '✏ RENAME MAP #' + id;
+    document.getElementById('modal-input').value = name;
+    document.getElementById('edit-modal').classList.add('show');
+    _modalCallback = async (newName) => {
+      await api('PATCH', `levels/${id}`, { name: newName });
+      toast('✔ Map renamed!');
+      loadLevels();
+    };
+    document.getElementById('modal-input').focus();
+  }
+
+  async function modalSave() {
+    const val = document.getElementById('modal-input').value.trim();
+    if (!val) { toast('Name cannot be empty', true); return; }
+    try { await _modalCallback(val); modalClose(); }
+    catch (e) { toast(e.message, true); }
+  }
+
+  function modalClose() {
+    document.getElementById('edit-modal').classList.remove('show');
+    _modalCallback = null;
+  }
+
+  async function deleteLevel(id, name) {
+    if (!confirm(`DELETE map "${name}"?`)) return;
+    try {
+      await api('DELETE', `levels/${id}`);
+      toast(`✔ Map "${name}" deleted`);
+      loadLevels(); loadStats();
+    } catch (e) { toast(e.message, true); }
+  }
+
+  // ─── SCORES ────────────────────────────────────────────────────
+  async function loadScores() {
+    const el = document.getElementById('scores-body');
+    el.innerHTML = '<div class="loading-container"><div class="loader"></div>LOADING...</div>';
+    try {
+      const scores = await api('GET', 'scores');
+      document.getElementById('nb-scores').textContent = scores.length;
+      if (!scores.length) { el.innerHTML = '<div class="empty-state"><div class="big">🏆</div>NO SCORES YET</div>'; return; }
+      el.innerHTML = `<table>
+        <thead><tr>
+          <th>ID</th><th>PLAYER</th><th>SCORE</th><th>DATE</th><th>ACTIONS</th>
+        </tr></thead>
+        <tbody>${scores.map((s,i) => `
+          <tr>
+            <td class="td-mono td-muted">#${s.id}</td>
+            <td class="td-mono" style="color:${i===0?'#ffd700':i===1?'#c0c0c0':i===2?'#cd7f32':'var(--cyan)'}">${esc(s.username)}</td>
+            <td class="td-mono" style="color:var(--green)">${s.value.toLocaleString()}</td>
+            <td class="td-muted">${s.achievedAt || '—'}</td>
+            <td><button class="act-btn danger" onclick="deleteScore(${s.id})">🗑 DELETE</button></td>
+          </tr>`).join('')}
+        </tbody></table>`;
+    } catch (e) { el.innerHTML = `<div class="empty-state"><div class="big">⚠</div>LOAD FAILED</div>`; toast(e.message, true); }
+  }
+
+  async function deleteScore(id) {
+    if (!confirm(`DELETE score entry #${id}?`)) return;
+    try {
+      await api('DELETE', `scores/${id}`);
+      toast(`✔ Score #${id} deleted`);
+      loadScores(); loadStats();
+    } catch (e) { toast(e.message, true); }
+  }
+
+  // ─── Logout ────────────────────────────────────────────────────
+  function doLogout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('username');
+    localStorage.removeItem('isAdmin');
+    window.location.href = '/portal.html';
+  }
+
+  // ─── Utils ─────────────────────────────────────────────────────
+  function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/'/g,'&#39;'); }
+
+  // Enter key in modal
+  document.getElementById('modal-input').addEventListener('keydown', e => { if (e.key === 'Enter') modalSave(); });
+  document.getElementById('edit-modal').addEventListener('click', e => { if (e.target === e.currentTarget) modalClose(); });
+
+  // Initial load
+  loadStats();
+
+  // ─── Cross-Tab Sync ─────────────────────────────────────────────
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'token' || e.key === 'isAdmin') {
+      const token = localStorage.getItem('token');
+      const isAdmin = localStorage.getItem('isAdmin') === 'true';
+      if (!token || !isAdmin) {
+        window.location.href = '/portal.html';
+      }
+    }
+  });
+</script>
+</body>
+</html>

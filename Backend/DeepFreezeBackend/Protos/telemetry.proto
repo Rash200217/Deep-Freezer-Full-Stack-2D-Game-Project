@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+option csharp_namespace = "DeepFreezeBackend.Protos";
+
+package telemetry;
+
+service TelemetryActivity {
+  rpc ReportEvent (GameEventRequest) returns (TelemetryResponse);
+}
+
+message GameEventRequest {
+  string UserId = 1;
+  string EventType = 2; // e.g., "ENEMY_FROZEN", "ICEBALL_PUSHED", "LEVEL_CLEARED"
+  int64 Timestamp = 3;
+  int32 EntityId = 4;
+}
+
+message TelemetryResponse {
+  bool Success = 1;
+}

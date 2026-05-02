@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Deep Freezer — Player Portal</title>
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323:wght@400&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --cyan: #00fff7;
+      --pink: #ff2d78;
+      --yellow: #ffe600;
+      --green: #39ff14;
+      --dark: #050510;
+      --card: #0a0a2a;
+      --border: #1a1a4a;
+      --text-primary: #F4F8FA;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--dark);
+      color: var(--text-primary);
+      font-family: 'VT323', monospace;
+      font-size: 20px;
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Animated starfield */
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image:
+        radial-gradient(1px 1px at 10% 20%, rgba(0,255,247,0.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 80% 10%, rgba(255,45,120,0.3) 0%, transparent 100%),
+        radial-gradient(1px 1px at 50% 70%, rgba(57,255,20,0.3) 0%, transparent 100%),
+        radial-gradient(1px 1px at 30% 85%, rgba(255,230,0,0.3) 0%, transparent 100%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 30px 40px;
+      position: relative;
+      z-index: 1;
+      flex: 1;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .header h1 {
+      font-family: 'Press Start 2P', monospace;
+      font-size: clamp(16px, 3vw, 28px);
+      color: var(--cyan);
+      text-shadow: 0 0 10px var(--cyan), 0 0 30px var(--cyan);
+      letter-spacing: 2px;
+      animation: flicker 4s infinite;
+    }
+
+    .header .subtitle {
+      font-size: 24px;
+      color: var(--pink);
+      margin-top: 10px;
+      text-shadow: 0 0 8px var(--pink);
+    }
+
+    @keyframes flicker {
+      0%, 95%, 100% { opacity: 1; }
+      96% { opacity: 0.6; }
+      97% { opacity: 1; }
+      98% { opacity: 0.4; }
+      99% { opacity: 1; }
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 0;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 12px;
+      background: var(--card);
+      border: 2px solid var(--border);
+      border-bottom: none;
+      color: #555;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+
+    .tab-btn.active {
+      color: var(--yellow);
+      border-color: var(--yellow);
+      text-shadow: 0 0 8px var(--yellow);
+      background: #0f0f30;
+    }
+
+    .tab-btn:hover:not(.active) {
+      color: var(--cyan);
+      border-color: #333;
+    }
+
+    /* Card */
+    .card {
+      background: var(--card);
+      border: 2px solid var(--yellow);
+      padding: 32px;
+      box-shadow: 0 0 20px rgba(255,230,0,0.15), inset 0 0 40px rgba(0,0,0,0.5);
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* Form */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      color: var(--pink);
+      font-family: 'Press Start 2P', monospace;
+      font-size: 10px;
+      margin-bottom: 8px;
+      text-shadow: 0 0 6px var(--pink);
+    }
+
+    .form-group input {
+      width: 100%;
+      background: #020215;
+      border: 2px solid var(--cyan);
+      color: var(--cyan);
+      font-family: 'VT323', monospace;
+      font-size: 24px;
+      padding: 10px 14px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-group input:focus {
+      border-color: var(--yellow);
+      box-shadow: 0 0 10px rgba(255,230,0,0.3);
+    }
+
+    /* Password Toggle */
+    .password-wrapper { position: relative; display: flex; align-items: center; }
+    .password-toggle {
+      position: absolute; right: 12px; color: var(--cyan);
+      cursor: pointer; font-size: 18px; user-select: none;
+      transition: all 0.2s; opacity: 0.6;
+    }
+    .password-toggle:hover { opacity: 1; transform: scale(1.2); text-shadow: 0 0 8px var(--cyan); }
+
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      background: transparent;
+      border: 2px solid var(--green);
+      color: var(--green);
+      font-family: 'Press Start 2P', monospace;
+      font-size: 12px;
+      cursor: pointer;
+      text-shadow: 0 0 8px var(--green);
+      box-shadow: 0 0 10px rgba(57,255,20,0.2);
+      transition: all 0.2s;
+      letter-spacing: 1px;
+      margin-top: 8px;
+    }
+
+    .btn:hover {
+      background: rgba(57,255,20,0.1);
+      box-shadow: 0 0 20px rgba(57,255,20,0.4);
+      transform: scale(1.01);
+    }
+
+    .btn:active { transform: scale(0.99); }
+
+    .message {
+      margin-top: 16px;
+      padding: 10px 14px;
+      font-size: 20px;
+      border-left: 4px solid var(--yellow);
+      background: rgba(255,230,0,0.05);
+      display: none;
+    }
+    .message.show { display: block; }
+    .message.error { border-color: var(--pink); color: var(--pink); }
+    .message.success { border-color: var(--green); color: var(--green); }
+
+    /* ── DASHBOARD ── */
+    #dashboard { display: none; }
+
+    .welcome-bar {
+      background: linear-gradient(90deg, #0a0a2a, #10102f);
+      border: 2px solid var(--cyan);
+      padding: 16px 24px;
+      margin-bottom: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .welcome-bar .name {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 13px;
+      color: var(--yellow);
+      text-shadow: 0 0 10px var(--yellow);
+    }
+
+    .logout-btn {
+      padding: 8px 16px;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 9px;
+      background: transparent;
+      border: 2px solid var(--pink);
+      color: var(--pink);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .logout-btn:hover { background: rgba(255,45,120,0.15); }
+
+    .dash-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    @media (max-width: 640px) { .dash-grid { grid-template-columns: 1fr; } }
+
+    .panel {
+      background: var(--card);
+      border: 2px solid var(--border);
+      overflow: hidden;
+    }
+
+    .panel-header {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 10px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-header.scores { background: #0f0f20; border-bottom: 2px solid var(--green); color: var(--green); }
+    .panel-header.maps   { background: #0f0f20; border-bottom: 2px solid var(--cyan);  color: var(--cyan);  }
+
+    .panel-body { padding: 8px 0; max-height: 380px; overflow-y: auto; }
+
+    /* Score table */
+    .score-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+    }
+    .score-row:hover { background: rgba(57,255,20,0.05); }
+    .score-rank {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 10px;
+      color: var(--yellow);
+      min-width: 28px;
+    }
+    .score-rank.gold   { color: #ffd700; text-shadow: 0 0 6px #ffd700; }
+    .score-rank.silver { color: #c0c0c0; }
+    .score-rank.bronze { color: #cd7f32; }
+    .score-name { flex: 1; color: var(--cyan); }
+    .score-value { color: var(--green); font-size: 22px; }
+    .you-badge {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 7px;
+      padding: 2px 6px;
+      background: var(--pink);
+      color: #fff;
+      margin-left: 6px;
+    }
+
+    /* Community map cards */
+    .map-card {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .map-card:hover { background: rgba(0,255,247,0.05); }
+    .map-card-name {
+      color: var(--yellow);
+      font-family: 'Press Start 2P', monospace;
+      font-size: 9px;
+      margin-bottom: 4px;
+    }
+    .map-card-meta { color: #666; font-size: 16px; }
+    .map-thumb {
+      width: 100%; max-width: 125px; height: auto;
+      border: 1px solid var(--border);
+      margin-bottom: 6px;
+      image-rendering: pixelated;
+    }
+    .rating-row { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+    .vote-btn {
+      padding: 3px 10px; border: 1px solid; font-family: 'VT323', monospace; font-size: 16px;
+      cursor: pointer; background: transparent; transition: all 0.15s;
+    }
+    .vote-btn.up   { border-color: var(--green); color: var(--green); }
+    .vote-btn.down { border-color: var(--pink);  color: var(--pink); }
+    .vote-btn.up:hover   { background: rgba(57,255,20,0.1); }
+    .vote-btn.down:hover { background: rgba(255,45,120,0.1); }
+    .vote-btn.active-up   { background: rgba(57,255,20,0.2); }
+    .vote-btn.active-down { background: rgba(255,45,120,0.2); }
+    .sort-tools { display: flex; gap: 6px; margin-bottom: 12px; }
+    .sort-btn {
+      padding: 5px 12px; font-family: 'Press Start 2P', monospace; font-size: 8px;
+      background: transparent; border: 1px solid var(--border); color: var(--muted);
+      cursor: pointer; transition: all 0.15s;
+    }
+    .sort-btn.active { border-color: var(--cyan); color: var(--cyan); }
+
+    /* Achievements */
+    /* Dashboard Layout */
+    .dash-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 24px;
+      margin-top: 24px;
+      align-items: start;
+    }
+
+    .ach-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 12px;
+    }
+    .ach-card {
+      background: var(--card); border: 2px solid var(--border);
+      padding: 14px; text-align: center; transition: border-color 0.2s;
+    }
+    .ach-card.unlocked { border-color: var(--yellow); }
+    .ach-card.locked   { opacity: 0.4; }
+    .ach-icon { font-size: 32px; margin-bottom: 6px; }
+    .ach-title { font-family: 'Press Start 2P', monospace; font-size: 8px; color: var(--yellow); margin-bottom: 4px; }
+    .ach-desc  { color: #777; font-size: 14px; }
+
+    /* Scrollbar */
+    .panel-body::-webkit-scrollbar { width: 6px; }
+    .panel-body::-webkit-scrollbar-track { background: #050510; }
+    .panel-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    /* Empty state */
+    .empty { text-align: center; padding: 32px; color: #00CCCC; font-size: 18px; }
+
+    /* Loading Spinner */
+    .loader {
+      width: 32px;
+      height: 32px;
+      border: 3px solid rgba(0, 255, 247, 0.1);
+      border-radius: 50%;
+      display: block;
+      border-top-color: var(--cyan);
+      box-shadow: 0 0 10px var(--cyan);
+      animation: spin 0.8s ease-in-out infinite;
+      margin: 20px auto;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Pixel corner decorations */
+    .card { position: relative; }
+    .card::before, .card::after {
+      content: "■";
+      position: absolute;
+      color: var(--yellow);
+      font-size: 10px;
+    }
+    .card::before { top: 6px; left: 8px; }
+    .card::after  { top: 6px; right: 8px; }
+
+    .divider {
+      border: none;
+      border-top: 1px dashed var(--border);
+      margin: 24px 0;
+    }
+
+    /* ── ADMIN OVERRIDE STYLES ── */
+    body.admin-mode { background: #000; }
+    body.admin-mode .card { border-color: var(--green); box-shadow: 0 0 30px rgba(57,255,20,0.2); }
+    body.admin-mode .header h1 { color: var(--green); text-shadow: 0 0 10px var(--green); }
+    body.admin-mode .header .subtitle { color: #555; }
+    
+    #admin-login-panel { display: none; }
+    .admin-warning {
+      color: var(--green);
+      font-family: 'Press Start 2P', monospace;
+      font-size: 10px;
+      margin-bottom: 20px;
+      text-align: center;
+      line-height: 1.6;
+    }
+    .terminal-header {
+      background: #0a2a0a;
+      color: var(--green);
+      padding: 8px 12px;
+      font-size: 12px;
+      border-bottom: 1px solid var(--green);
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+    }
+    #auth-section, #admin-login-panel {
+      max-width: 650px;
+      margin: 40px auto 0;
+    }
+
+    #auth-section .card {
+      background-image: linear-gradient(rgba(5, 5, 16, 0.85), rgba(5, 5, 16, 0.85)), url('/player_portal_bg.png');
+      background-size: cover;
+      background-position: center;
+      border-color: var(--cyan);
+    }
+
+    #admin-login-panel .card {
+      background-image: linear-gradient(rgba(0, 0, 0, 0.88), rgba(0, 0, 0, 0.88)), url('/admin_console_bg.png');
+      background-size: cover;
+      background-position: center;
+      border-color: var(--green);
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <h1>❄ DEEP FREEZER ❄</h1>
+    <div class="subtitle" id="portal-subtitle">[ PLAYER PORTAL ]</div>
+  </div>
+
+  <!-- Admin Secret Panel -->
+  <div id="admin-login-panel">
+    <div class="card">
+      <div class="terminal-header">
+        <span>ADMIN_TERMINAL_V1.0</span>
+        <span>STATUS: SECURE</span>
+      </div>
+      <!-- Admin Console Tabs -->
+      <div class="tabs" style="margin-bottom:20px; border-bottom:1px solid var(--green);">
+        <button class="tab-btn active" id="admin-login-tab" onclick="switchAdminTab('login')" style="background:#0a1a0a; border-color:var(--green); color:var(--green); font-size:9px;">▶ ACCESS_SYSTEM</button>
+        <button class="tab-btn" id="admin-reg-tab" onclick="switchAdminTab('register')" style="background:#0a1a0a; border-color:var(--green); color:var(--green); font-size:9px;">▶ REGISTER_ADMIN</button>
+      </div>
+
+      <!-- Admin Login Sub-Panel -->
+      <div id="admin-sub-login">
+        <div class="form-group">
+          <label>ADMIN_ID</label>
+          <input type="text" id="admin-user" style="border-color:var(--green); color:var(--green);" placeholder="ID..." />
+        </div>
+        <div class="form-group">
+          <label>ACCESS_KEY</label>
+          <div class="password-wrapper">
+            <input type="password" id="admin-pass" style="border-color:var(--green); color:var(--green);" placeholder="KEY..." />
+            <span class="password-toggle" onclick="togglePass('admin-pass', this)" style="color:var(--green);">👁</span>
+          </div>
+        </div>
+        <button class="btn" style="border-color:var(--green); color:var(--green); text-shadow: 0 0 8px var(--green);" onclick="doAdminLogin()">▶ INITIALIZE SYSTEM OVERRIDE</button>
+      </div>
+
+      <!-- Admin Register Sub-Panel -->
+      <div id="admin-sub-reg" style="display:none;">
+        <div class="form-group">
+          <label>NEW_ADMIN_ID</label>
+          <input type="text" id="admin-reg-user" style="border-color:var(--green); color:var(--green);" placeholder="Enter ID..." />
+        </div>
+        <div class="form-group">
+          <label>NEW_ACCESS_KEY</label>
+          <div class="password-wrapper">
+            <input type="password" id="admin-reg-pass" style="border-color:var(--green); color:var(--green);" placeholder="Enter Key (6-8 chars)..." />
+            <span class="password-toggle" onclick="togglePass('admin-reg-pass', this)" style="color:var(--green);">👁</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>AUTHORIZATION_CODE</label>
+          <input type="password" id="admin-reg-code" style="border-color:var(--green); color:var(--green);" placeholder="Master Code..." />
+        </div>
+        <button class="btn" style="border-color:var(--green); color:var(--green);" onclick="doAdminRegister()">▶ AUTHORIZE NEW ACCOUNT</button>
+      </div>
+      <div class="message" id="admin-msg"></div>
+      
+      <div style="text-align:center; margin-top:20px;">
+        <a href="portal.html" style="color:#8A9BB2; font-size:14px; text-decoration:none;">◀ RETURN TO PUBLIC PORTAL</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Auth section -->
+  <div id="auth-section">
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('login')">▶ LOGIN</button>
+      <button class="tab-btn" onclick="switchTab('register')">▶ REGISTER</button>
+    </div>
+
+    <div class="card">
+      <!-- Login Panel -->
+      <div class="tab-panel active" id="panel-login">
+        <div class="form-group">
+          <label>USERNAME</label>
+          <input type="text" id="login-user" placeholder="Enter username..." autocomplete="username" />
+        </div>
+        <div class="form-group">
+          <label>PASSWORD</label>
+          <div class="password-wrapper">
+            <input type="password" id="login-pass" placeholder="Enter password..." autocomplete="current-password" />
+            <span class="password-toggle" onclick="togglePass('login-pass', this)">👁</span>
+          </div>
+        </div>
+        <button class="btn" onclick="doLogin()">▶ INSERT COIN TO LOGIN</button>
+        <div class="message" id="login-msg"></div>
+      </div>
+
+      <!-- Register Panel -->
+      <div class="tab-panel" id="panel-register">
+        <div class="form-group">
+          <label>CHOOSE USERNAME</label>
+          <input type="text" id="reg-user" placeholder="Enter username..." autocomplete="username" />
+        </div>
+        <div class="form-group">
+          <label>CHOOSE PASSWORD</label>
+          <div class="password-wrapper">
+            <input type="password" id="reg-pass" placeholder="Enter password (6-8 chars)..." autocomplete="new-password" />
+            <span class="password-toggle" onclick="togglePass('reg-pass', this)">👁</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>CONFIRM PASSWORD</label>
+          <div class="password-wrapper">
+            <input type="password" id="reg-pass2" placeholder="Confirm password (6-8 chars)..." autocomplete="new-password" />
+            <span class="password-toggle" onclick="togglePass('reg-pass2', this)">👁</span>
+          </div>
+        </div>
+        <button class="btn" onclick="doRegister()">▶ CREATE PLAYER PROFILE</button>
+        <div class="message" id="reg-msg"></div>
+      </div>
+    </div>
+
+    <div style="text-align:center; margin-top:20px; color:var(--pink); font-size:18px; text-shadow: 0 0 5px var(--pink);">
+      ⚠ WARNING! USE FAKE NAMES AND PASSWORDS WHEN CREATING AN ACCOUNT
+    </div>
+  </div>
+
+  <!-- Dashboard (shown after login) -->
+  <div id="dashboard">
+    <div class="welcome-bar">
+      <div>
+        <div style="font-size:16px;color:#aaa;margin-bottom:4px;">PLAYER IDENTIFIED</div>
+        <div class="name" id="dash-username">---</div>
+      </div>
+      <button class="logout-btn" onclick="doLogout()">✖ LOGOUT</button>
+    </div>
+
+    <div class="dash-grid">
+      <!-- Scores Panel -->
+      <div class="panel">
+        <div class="panel-header scores">🏆 LEADERBOARD</div>
+        <div class="panel-body" id="scores-list" style="max-height: 500px;">
+          <div class="loader"></div>
+        </div>
+      </div>
+
+      <!-- Community Maps Panel -->
+      <div class="panel">
+        <div class="panel-header maps">🗺 COMMUNITY MAPS</div>
+        <div class="panel-body" id="maps-list" style="max-height: 500px;">
+          <div style="padding:10px;">
+            <div class="sort-tools">
+              <button class="sort-btn active" id="sort-new" onclick="setSort('new')">🕐 NEWEST</button>
+              <button class="sort-btn" id="sort-top" onclick="setSort('top')">🔥 TOP RATED</button>
+            </div>
+            <div id="maps-inner"><div class="loader"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Achievements Panel -->
+      <div class="panel">
+        <div class="panel-header" style="background:#0f0f20;border-bottom:2px solid var(--yellow);color:var(--yellow);">🏅 ACHIEVEMENTS</div>
+        <div class="panel-body" style="max-height: 500px; padding:16px;">
+          <div class="ach-grid" id="ach-grid"><div class="loader"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  </div>
+
+  <footer style="text-align:center; padding: 40px 20px; color:#555; font-size:12px; font-family:'Press Start 2P', monospace;">
+    &copy; 2026 DEEP FREEZER. ALL RIGHTS RESERVED.
+  </footer>
+
+<script>
+  const API = '';  // Same origin via Vite proxy
+
+  // ─── Tab switching ─────────────────────────────────────────────
+  function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach((b, i) => {
+      b.classList.toggle('active', (i === 0 && tab === 'login') || (i === 1 && tab === 'register'));
+    });
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-' + tab).classList.add('active');
+  }
+
+  function switchAdminTab(tab) {
+    document.getElementById('admin-sub-login').style.display = tab === 'login' ? 'block' : 'none';
+    document.getElementById('admin-sub-reg').style.display = tab === 'register' ? 'block' : 'none';
+    document.getElementById('admin-login-tab').classList.toggle('active', tab === 'login');
+    document.getElementById('admin-reg-tab').classList.toggle('active', tab === 'register');
+  }
+
+  function showMsg(id, text, type) {
+    const el = document.getElementById(id);
+    el.textContent = text;
+    el.className = 'message show ' + type;
+  }
+
+  function togglePass(inputId, icon) {
+    const input = document.getElementById(inputId);
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.textContent = '🔒';
+    } else {
+      input.type = 'password';
+      icon.textContent = '👁';
+    }
+  }
+
+  // ─── Auth ──────────────────────────────────────────────────────
+  async function doLogin() {
+    const username = document.getElementById('login-user').value.trim();
+    const password = document.getElementById('login-pass').value;
+    if (!username || !password) { showMsg('login-msg', '⚠ FILL ALL FIELDS', 'error'); return; }
+
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+      if (!res.ok) { showMsg('login-msg', '✖ INVALID CREDENTIALS', 'error'); return; }
+      const data = await res.json();
+      saveSession(data.token, data.username, data.isAdmin);
+      if (data.isAdmin) {
+        window.location.href = '/admin.html';
+      } else {
+        showDashboard(data.username);
+      }
+    } catch (e) {
+      showMsg('login-msg', '✖ SERVER UNREACHABLE', 'error');
+    }
+  }
+
+  async function doAdminLogin() {
+    const username = document.getElementById('admin-user').value.trim();
+    const password = document.getElementById('admin-pass').value;
+    if (!username || !password) { showMsg('admin-msg', '⚠ FIELDS REQUIRED', 'error'); return; }
+
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+      if (!res.ok) { showMsg('admin-msg', '✖ ACCESS DENIED', 'error'); return; }
+      const data = await res.json();
+      if (!data.isAdmin) {
+        showMsg('admin-msg', '✖ INSUFFICIENT PERMISSIONS', 'error');
+        return;
+      }
+      saveSession(data.token, data.username, true);
+      window.location.href = '/admin.html';
+    } catch (e) {
+      showMsg('admin-msg', '✖ CORE OFFLINE', 'error');
+    }
+  }
+
+  async function doAdminRegister() {
+    const username = document.getElementById('admin-reg-user').value.trim();
+    const password = document.getElementById('admin-reg-pass').value;
+    const adminCode = document.getElementById('admin-reg-code').value.trim();
+    if (!username || !password || !adminCode) { showMsg('admin-msg', '⚠ ALL FIELDS REQUIRED', 'error'); return; }
+    if (password.length < 6 || password.length > 8) { showMsg('admin-msg', '⚠ PASSWORD MUST BE 6-8 CHARS', 'error'); return; }
+
+    try {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password, adminCode })
+      });
+      if (!res.ok) { showMsg('admin-msg', '✖ AUTHORIZATION FAILED', 'error'); return; }
+      showMsg('admin-msg', '✔ ADMIN CREATED. INITIALIZING...', 'success');
+      setTimeout(() => switchAdminTab('login'), 1500);
+    } catch (e) {
+      showMsg('admin-msg', '✖ REGISTRATION ERROR', 'error');
+    }
+  }
+
+  async function doRegister() {
+    const username = document.getElementById('reg-user').value.trim();
+    const password = document.getElementById('reg-pass').value;
+    const pass2    = document.getElementById('reg-pass2').value;
+    if (!username || !password) { showMsg('reg-msg', '⚠ FILL ALL FIELDS', 'error'); return; }
+    if (password.length < 6 || password.length > 8) { showMsg('reg-msg', '⚠ PASSWORD MUST BE 6-8 CHARS', 'error'); return; }
+    if (password !== pass2) { showMsg('reg-msg', '⚠ PASSWORDS DO NOT MATCH', 'error'); return; }
+
+    try {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        showMsg('reg-msg', '✖ ' + (err.message || 'USERNAME TAKEN'), 'error');
+        return;
+      }
+      const data = await res.json();
+      const label = data.isAdmin ? '✔ ADMIN ACCOUNT CREATED!' : '✔ ACCOUNT CREATED! NOW LOGIN.';
+      showMsg('reg-msg', label, 'success');
+      document.getElementById('reg-user').value = '';
+      document.getElementById('reg-pass').value = '';
+      document.getElementById('reg-pass2').value = '';
+    } catch (e) {
+      showMsg('reg-msg', '✖ SERVER UNREACHABLE', 'error');
+    }
+  }
+
+  function saveSession(token, username, isAdmin = false) {
+    localStorage.setItem('token', token);
+    localStorage.setItem('username', username);
+    localStorage.setItem('isAdmin', isAdmin ? 'true' : 'false');
+  }
+
+  function doLogout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('username');
+    document.getElementById('dashboard').style.display = 'none';
+    document.getElementById('auth-section').style.display = 'block';
+  }
+
+  // ─── Dashboard ─────────────────────────────────────────────────
+  let currentSort = 'new';
+  let currentUsername = '';
+
+  function showDashboard(username) {
+    document.getElementById('auth-section').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    document.getElementById('dash-username').textContent = username.toUpperCase();
+    currentUsername = username;
+    loadScores(username);
+    loadMaps();
+    loadAchievements();
+  }
+
+  function setSort(sort) {
+    currentSort = sort;
+    document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('sort-' + sort)?.classList.add('active');
+    loadMaps();
+  }
+
+  async function loadScores(uname) {
+    const el = document.getElementById('scores-list');
+    el.innerHTML = '<div class="loader"></div>';
+    try {
+      const res = await fetch('/api/scores/leaderboard');
+      const scores = await res.json();
+      if (!scores.length) { el.innerHTML = '<div class="empty">NO SCORES YET.<br/>START PLAYING!</div>'; return; }
+      const rankChars = ['gold', 'silver', 'bronze'];
+      el.innerHTML = scores.slice(0, 15).map((s, i) => `
+        <div class="score-row">
+          <div class="score-rank ${rankChars[i] || ''}">#${i+1}</div>
+          <div class="score-name">
+            ${escHtml(s.username)}
+            ${s.username === uname ? '<span class="you-badge">YOU</span>' : ''}
+          </div>
+          <div class="score-value">${s.value.toLocaleString()}</div>
+        </div>
+      `).join('');
+    } catch { el.innerHTML = '<div class="empty">FAILED TO LOAD</div>'; }
+  }
+
+  async function loadMaps() {
+    const container = document.getElementById('maps-inner') || document.getElementById('maps-list');
+    if (!container) return;
+    container.innerHTML = '<div class="loader"></div>';
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`/api/levels?limit=30&sort=${currentSort}`);
+      const maps = await res.json();
+      if (!maps.length) { container.innerHTML = '<div class="empty">NO MAPS YET.<br/>BE THE FIRST!</div>'; return; }
+      container.innerHTML = maps.map(m => `
+        <div class="map-card" id="map-${m.id}">
+          ${m.thumbnail ? `<img class="map-thumb" src="${escHtml(m.thumbnail)}" alt="Map thumbnail" />` : ''}
+          <div class="map-card-name">${escHtml(m.name)}</div>
+          <div class="map-card-meta">BY ${escHtml(m.authorName || 'ANONYMOUS')} · ${formatDate(m.createdAt)}</div>
+          <div class="rating-row">
+            <button class="vote-btn up" onclick="vote(${m.id}, 1)">👍 ${m.upvotes}</button>
+            <button class="vote-btn down" onclick="vote(${m.id}, -1)">👎 ${m.downvotes}</button>
+            <span style="color:var(--muted);font-size:14px;">SCORE: ${m.rating >= 0 ? '+' : ''}${m.rating}</span>
+          </div>
+        </div>
+      `).join('');
+
+      // Load my votes if logged in
+      if (token) loadMyVotes(maps, token);
+    } catch { container.innerHTML = '<div class="empty">FAILED TO LOAD</div>'; }
+  }
+
+  async function loadMyVotes(maps, token) {
+    for (const m of maps) {
+      try {
+        const res = await fetch(`/api/levels/${m.id}/myvote`, {
+          headers: { Authorization: 'Bearer ' + token }
+        });
+        const data = await res.json();
+        if (data.vote !== 0) {
+          const card = document.getElementById('map-' + m.id);
+          const btn = card?.querySelector(data.vote === 1 ? '.vote-btn.up' : '.vote-btn.down');
+          btn?.classList.add(data.vote === 1 ? 'active-up' : 'active-down');
+        }
+      } catch {}
+    }
+  }
+
+  async function vote(levelId, voteVal) {
+    const token = localStorage.getItem('token');
+    if (!token) { alert('LOGIN REQUIRED TO VOTE'); return; }
+    try {
+      const res = await fetch(`/api/levels/${levelId}/vote`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+        body: JSON.stringify({ vote: voteVal })
+      });
+      const data = await res.json();
+      const card = document.getElementById('map-' + levelId);
+      if (card) {
+        card.querySelector('.vote-btn.up').textContent  = '👍 ' + data.upvotes;
+        card.querySelector('.vote-btn.down').textContent = '👎 ' + data.downvotes;
+        card.querySelector('span').textContent = 'SCORE: ' + (data.rating >= 0 ? '+' : '') + data.rating;
+        card.querySelectorAll('.vote-btn').forEach(b => b.classList.remove('active-up','active-down'));
+        card.querySelector(voteVal === 1 ? '.vote-btn.up' : '.vote-btn.down')?.classList.add(voteVal === 1 ? 'active-up' : 'active-down');
+      }
+    } catch { alert('VOTE FAILED'); }
+  }
+
+  async function loadAchievements() {
+    const el = document.getElementById('ach-grid');
+    const token = localStorage.getItem('token');
+    if (!token || !el) return;
+    try {
+      const res = await fetch('/api/achievements/mine', { headers: { Authorization: 'Bearer ' + token } });
+      const data = await res.json();
+      el.innerHTML = data.all.map(a => `
+        <div class="ach-card ${a.unlocked ? 'unlocked' : 'locked'}">
+          <div class="ach-icon">${escHtml(a.icon)}</div>
+          <div class="ach-title">${escHtml(a.title)}</div>
+          <div class="ach-desc">${escHtml(a.description)}</div>
+          ${a.unlocked ? '<div style="color:var(--green);font-size:13px;margin-top:6px;">✔ UNLOCKED</div>' : '<div style="color:#8A9BB2;font-size:13px;margin-top:6px;">🔒 LOCKED</div>'}
+        </div>
+      `).join('');
+    } catch { if (el) el.innerHTML = '<div class="empty">FAILED TO LOAD</div>'; }
+  }
+
+  // ─── Utils ─────────────────────────────────────────────────────
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function formatDate(str) {
+    try { return new Date(str).toLocaleDateString(); } catch { return '???'; }
+  }
+
+  // Auto-detect existing session
+  const existingToken    = localStorage.getItem('token');
+  const existingUsername = localStorage.getItem('username');
+  const existingIsAdmin  = localStorage.getItem('isAdmin') === 'true';
+  if (existingToken && existingUsername) {
+    if (existingIsAdmin) {
+      window.location.href = '/admin.html'; // redirect admins straight to console
+    } else {
+      showDashboard(existingUsername);
+    }
+  }
+
+  // Allow Enter key to submit forms
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    const activePanel = document.querySelector('.tab-panel.active');
+    if (activePanel?.id === 'panel-login') doLogin();
+    else if (activePanel?.id === 'panel-register') doRegister();
+  });
+
+  // Auto-switch tab based on ?tab= URL param
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlTab = urlParams.get('tab');
+  const isAdminRequest = urlParams.get('access') === 'system';
+
+  if (isAdminRequest) {
+    document.body.classList.add('admin-mode');
+    document.getElementById('auth-section').style.display = 'none';
+    document.getElementById('admin-login-panel').style.display = 'block';
+    document.getElementById('portal-subtitle').textContent = '[ ADMINISTRATIVE CONSOLE ]';
+    document.getElementById('portal-subtitle').style.color = '#39ff14';
+  } else if (urlTab === 'register') {
+    switchTab('register');
+  }
+
+  // ─── Cross-Tab Sync ─────────────────────────────────────────────
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'token' || e.key === 'username') {
+      const token = localStorage.getItem('token');
+      const uname = localStorage.getItem('username');
+      
+      if (!token || !uname) {
+        // Logged out in another tab
+        doLogout();
+      } else {
+        // Logged in in another tab
+        showDashboard(uname);
+      }
+    }
+  });
+</script>
+</body>
+</html>
