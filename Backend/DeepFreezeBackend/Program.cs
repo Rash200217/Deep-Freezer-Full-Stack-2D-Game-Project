@@ -7,7 +7,10 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.WebHost.UseUrls("http://localhost:5000");
+
+// Render assigns a dynamic PORT — this reads it automatically
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
 // Add Database via PostgreSQL (Neon)
 builder.Services.AddDbContext<GameDbContext>(options =>
@@ -41,7 +44,12 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll",
         policy => policy
-            .WithOrigins("http://localhost:5173", "http://localhost:5174", "http://localhost:5175")
+            .WithOrigins(
+                "http://localhost:5173",
+                "http://localhost:5174",
+                "http://localhost:5175",
+                "https://deep-freezer-game.vercel.app"  // ← Your Vercel frontend URL (update after deploying)
+            )
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials()
