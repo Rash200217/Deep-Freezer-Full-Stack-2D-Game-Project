@@ -10,8 +10,9 @@ class SignalRManager {
     public onScoreUpdated?: (username: string, score: number) => void;
 
     public async connect(username: string) {
+        const BASE_URL = import.meta.env.VITE_API_URL ?? '';
         this.connection = new signalR.HubConnectionBuilder()
-            .withUrl("/gamehub") // Proxied
+            .withUrl(`${BASE_URL}/gamehub`) // Uses Render URL in prod, Vite proxy in dev
             .withAutomaticReconnect()
             .build();
 
