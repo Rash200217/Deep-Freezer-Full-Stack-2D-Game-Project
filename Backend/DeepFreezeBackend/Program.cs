@@ -48,7 +48,7 @@ builder.Services.AddCors(options =>
                 "http://localhost:5173",
                 "http://localhost:5174",
                 "http://localhost:5175",
-                "https://deep-freezer-backend.onrender.com"  // ← Your Vercel frontend URL (update after deploying)
+                "https://deep-freezer-game.vercel.app"  // ← Vercel frontend URL (update to your real URL)
             )
             .AllowAnyHeader()
             .AllowAnyMethod()
@@ -66,6 +66,9 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapHub<GameHub>("/gamehub");
 app.MapGrpcService<TelemetryService>().EnableGrpcWeb();
+
+// Health check — prevents Render/browser 404 on GET /
+app.MapGet("/", () => Results.Ok(new { status = "Deep Freezer API is running 🧠❄️", version = "1.0" }));
 
 // Fully manual SQL schema - gives 100% control over nullable columns
 using (var scope = app.Services.CreateScope())
