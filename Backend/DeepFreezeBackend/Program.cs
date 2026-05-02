@@ -48,7 +48,7 @@ builder.Services.AddCors(options =>
                 "http://localhost:5173",
                 "http://localhost:5174",
                 "http://localhost:5175",
-                "https://deep-freezer-game.vercel.app"  // ← Your Vercel frontend URL (update after deploying)
+                "https://deep-freezer-backend.onrender.com"  // ← Your Vercel frontend URL (update after deploying)
             )
             .AllowAnyHeader()
             .AllowAnyMethod()
