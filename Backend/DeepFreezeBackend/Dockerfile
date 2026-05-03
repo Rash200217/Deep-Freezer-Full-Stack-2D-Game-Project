@@ -20,7 +20,7 @@ WORKDIR /app
 
 # Copy published output from build stage
 COPY --from=build /app/out .
-
+RUN apt-get update && apt-get install -y libgssapi-krb5-2
 # AWS App Runner / Docker default port
 EXPOSE 8080
 ENV ASPNETCORE_URLS=http://+:8080
