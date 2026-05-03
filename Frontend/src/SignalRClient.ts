@@ -10,7 +10,7 @@ class SignalRManager {
     public onScoreUpdated?: (username: string, score: number) => void;
 
     public async connect(username: string) {
-        const BASE_URL = import.meta.env.VITE_API_URL ?? '';
+        const BASE_URL = 'https://deepfreeze-api.duckdns.org';
         this.connection = new signalR.HubConnectionBuilder()
             .withUrl(`${BASE_URL}/gamehub`) // Uses Render URL in prod, Vite proxy in dev
             .withAutomaticReconnect()

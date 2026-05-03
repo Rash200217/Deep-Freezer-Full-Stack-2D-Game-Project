@@ -1,8 +1,7 @@
 import axios from 'axios';
 
-// In production (Vercel), points to Render backend.
-// In local dev, empty string so Vite proxy handles routing.
-const BASE_URL = import.meta.env.VITE_API_URL ?? '';
+// Production AWS Backend
+const BASE_URL = 'https://deepfreeze-api.duckdns.org';
 
 let authToken = '';
 let currentUser = '';
