@@ -9,8 +9,7 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 // Render assigns a dynamic PORT — this reads it automatically
-var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
-builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+builder.WebHost.UseIISIntegration();
 
 // Add Database via PostgreSQL (Neon)
 builder.Services.AddDbContext<GameDbContext>(options =>
