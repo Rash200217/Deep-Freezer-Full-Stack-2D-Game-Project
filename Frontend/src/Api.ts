@@ -37,13 +37,13 @@ export const Api = {
     isAdmin() { return isAdminUser; },
 
     async login(username: string, password: string = 'password') {
-        const res = await axios.post(`${BASE_URL}/api/auth/login`, { username, password });
+        const res = await axios.post(`${BASE_URL}/api/Auth/login`, { username, password });
         this.setToken(res.data.token, res.data.username, res.data.isAdmin);
         return res.data;
     },
 
     async register(username: string, password: string = 'password') {
-        const res = await axios.post(`${BASE_URL}/api/auth/register`, { username, password });
+        const res = await axios.post(`${BASE_URL}/api/Auth/register`, { username, password });
         return res.data;
     },
 
