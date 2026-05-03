@@ -8,8 +8,9 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Render assigns a dynamic PORT — this reads it automatically
-builder.WebHost.UseIISIntegration();
+// AWS App Runner / Docker assigns a dynamic PORT
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
 // Add Database via PostgreSQL (Neon)
 builder.Services.AddDbContext<GameDbContext>(options =>
