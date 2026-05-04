@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Production AWS Backend
-const BASE_URL = 'https://deepfreeze-api.duckdns.org/';
+const BASE_URL = 'https://deepfreeze-api.duckdns.org';
 
 let authToken = '';
 let currentUser = '';
