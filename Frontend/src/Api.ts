@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-// Production AWS Backend
+// --- VERSION 2.0 (HARDCODED) ---
+console.log("%c DEEP FREEZER API V2.0 LOADING... ", "background: #222; color: #00ff00; font-size: 20px;");
+
 const BASE_URL = 'https://deepfreeze-api.duckdns.org';
 
 let authToken = '';
@@ -37,12 +39,14 @@ export const Api = {
     isAdmin() { return isAdminUser; },
 
     async login(username: string, password: string = 'password') {
+        console.log("Attempting Login to:", `${BASE_URL}/api/Auth/login`);
         const res = await axios.post(`${BASE_URL}/api/Auth/login`, { username, password });
         this.setToken(res.data.token, res.data.username, res.data.isAdmin);
         return res.data;
     },
 
     async register(username: string, password: string = 'password') {
+        console.log("Attempting Register to:", `${BASE_URL}/api/Auth/register`);
         const res = await axios.post(`${BASE_URL}/api/Auth/register`, { username, password });
         return res.data;
     },
