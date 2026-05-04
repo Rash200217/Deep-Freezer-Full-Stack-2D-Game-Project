@@ -14,6 +14,7 @@ export class MenuScene extends Scene {
   private mainContainer!: GameObjects.Container;
   private playerSelectContainer!: GameObjects.Container;
   private instructionsContainer!: GameObjects.Container;
+  private loadingOverlay!: GameObjects.Container;
 
   constructor() {
     super('MenuScene');
@@ -188,6 +189,7 @@ export class MenuScene extends Scene {
         authorBtn.setAlpha(0.6).clearTint();
         this.tweens.add({ targets: authorBtn, scale: 1.0, duration: 100 });
     });
+    this.createLoadingOverlay();
   }
 
   private createParallaxBg() {
@@ -285,9 +287,82 @@ export class MenuScene extends Scene {
         window.open('/admin.html', '_blank');
         return;
     }
+
+    // Show Loading Overlay
+    this.showLoading(true);
+
     const username = Api.getUsername() || `Guest_${Math.floor(Math.random()*1000)}`;
-    await signalRClient.connect(username);
-    this.scene.start('GameScene', { restart: true, players: players });
+    try {
+        await signalRClient.connect(username);
+        // Small delay for smooth transition
+        this.time.delayedCall(800, () => {
+            this.scene.start('GameScene', { restart: true, players: players });
+        });
+    } catch (err) {
+        console.error("Failed to connect:", err);
+        this.showLoading(false);
+        alert("CONNECTION FAILED. PLEASE TRY AGAIN.");
+    }
+  }
+
+  private createLoadingOverlay() {
+    this.loadingOverlay = this.add.container(0, 0).setVisible(false).setAlpha(0).setDepth(2000);
+    
+    // Background Blur/Dim
+    const bg = this.add.rectangle(400, 300, 800, 600, 0x000000, 0.9);
+    
+    // Spinning Crystal
+    const crystal = this.add.image(400, 250, 'bullet')
+        .setScale(4)
+        .setTint(0x00ffff);
+    
+    this.tweens.add({
+        targets: crystal,
+        angle: 360,
+        duration: 2000,
+        repeat: -1
+    });
+
+    this.tweens.add({
+        targets: crystal,
+        scale: 5,
+        alpha: 0.5,
+        duration: 1000,
+        yoyo: true,
+        repeat: -1
+    });
+
+    const title = this.add.text(400, 350, 'INITIALIZING MISSION...', {
+        fontSize: '28px',
+        fontFamily: 'Press Start 2P, Arial',
+        color: '#00ffff',
+        stroke: '#003366',
+        strokeThickness: 4
+    }).setOrigin(0.5);
+
+    const subtext = this.add.text(400, 400, 'SYNCHRONIZING WITH AWS CLOUD...', {
+        fontSize: '14px',
+        color: '#ffffff'
+    }).setOrigin(0.5).setAlpha(0.7);
+
+    this.tweens.add({
+        targets: [title, subtext],
+        alpha: 0.3,
+        duration: 800,
+        yoyo: true,
+        repeat: -1
+    });
+
+    this.loadingOverlay.add([bg, crystal, title, subtext]);
+  }
+
+  private showLoading(show: boolean) {
+    if (show) {
+        this.loadingOverlay.setVisible(true);
+        this.tweens.add({ targets: this.loadingOverlay, alpha: 1, duration: 400 });
+    } else {
+        this.tweens.add({ targets: this.loadingOverlay, alpha: 0, duration: 300, onComplete: () => this.loadingOverlay.setVisible(false) });
+    }
   }
 
   private async fetchAndDisplayLeaderboard() {
