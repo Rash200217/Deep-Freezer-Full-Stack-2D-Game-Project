@@ -5,7 +5,7 @@ export const AchievementsApi = {
         try {
             const token = localStorage.getItem('token');
             if (!token) return null;
-            const res = await axios.post('/api/achievements/unlock', { key }, {
+            const res = await axios.post('https://deepfreeze-api.duckdns.org/api/achievements/unlock', { key }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             return res.data;
@@ -18,7 +18,7 @@ export const AchievementsApi = {
         try {
             const token = localStorage.getItem('token');
             if (!token) return null;
-            const res = await axios.get('/api/achievements/mine', {
+            const res = await axios.get('https://deepfreeze-api.duckdns.org/api/achievements/mine', {
                 headers: { Authorization: `Bearer ${token}` }
             });
             return res.data;

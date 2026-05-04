@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = '/api/levels';
+const BASE_URL = 'https://deepfreeze-api.duckdns.org/api/levels';
 
 export const LevelsApi = {
     getLevels: async (limit = 20, sort: 'new' | 'top' = 'new') => {
