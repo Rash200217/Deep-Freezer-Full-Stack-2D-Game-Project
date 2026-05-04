@@ -55,6 +55,10 @@
       flex: 1;
     }
 
+    @media (max-width: 768px) {
+      .container { padding: 20px 15px; }
+    }
+
     /* Header */
     .header {
       text-align: center;
@@ -116,6 +120,11 @@
     .tab-btn:hover:not(.active) {
       color: var(--cyan);
       border-color: #333;
+    }
+
+    @media (max-width: 480px) {
+      .tab-btn { font-size: 9px; padding: 10px 5px; }
+      .header h1 { font-size: 20px; }
     }
 
     /* Card */
@@ -289,6 +298,11 @@
     .score-rank.bronze { color: #cd7f32; }
     .score-name { flex: 1; color: var(--cyan); }
     .score-value { color: var(--green); font-size: 22px; }
+
+    @media (max-width: 480px) {
+      .score-value { font-size: 18px; }
+      .score-name { font-size: 16px; }
+    }
     .you-badge {
       font-family: 'Press Start 2P', monospace;
       font-size: 7px;
@@ -342,7 +356,7 @@
     /* Dashboard Layout */
     .dash-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       gap: 24px;
       margin-top: 24px;
       align-items: start;
