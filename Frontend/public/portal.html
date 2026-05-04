@@ -661,7 +661,7 @@
     if (!username || !password) { showMsg('login-msg', '⚠ FILL ALL FIELDS', 'error'); return; }
 
     try {
-      const res = await fetch('/api/auth/login', {
+      const res = await fetch('https://deepfreeze-api.duckdns.org/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })
@@ -685,7 +685,7 @@
     if (!username || !password) { showMsg('admin-msg', '⚠ FIELDS REQUIRED', 'error'); return; }
 
     try {
-      const res = await fetch('/api/auth/login', {
+      const res = await fetch('https://deepfreeze-api.duckdns.org/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })
@@ -711,7 +711,7 @@
     if (password.length < 6 || password.length > 8) { showMsg('admin-msg', '⚠ PASSWORD MUST BE 6-8 CHARS', 'error'); return; }
 
     try {
-      const res = await fetch('/api/auth/register', {
+      const res = await fetch('https://deepfreeze-api.duckdns.org/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password, adminCode })
@@ -733,7 +733,7 @@
     if (password !== pass2) { showMsg('reg-msg', '⚠ PASSWORDS DO NOT MATCH', 'error'); return; }
 
     try {
-      const res = await fetch('/api/auth/register', {
+      const res = await fetch('https://deepfreeze-api.duckdns.org/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })
@@ -792,7 +792,7 @@
     const el = document.getElementById('scores-list');
     el.innerHTML = '<div class="loader"></div>';
     try {
-      const res = await fetch('/api/scores/leaderboard');
+      const res = await fetch('https://deepfreeze-api.duckdns.org/api/scores/leaderboard');
       const scores = await res.json();
       if (!scores.length) { el.innerHTML = '<div class="empty">NO SCORES YET.<br/>START PLAYING!</div>'; return; }
       const rankChars = ['gold', 'silver', 'bronze'];
@@ -815,7 +815,7 @@
     container.innerHTML = '<div class="loader"></div>';
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`/api/levels?limit=30&sort=${currentSort}`);
+      const res = await fetch(`https://deepfreeze-api.duckdns.org/api/levels?limit=30&sort=${currentSort}`);
       const maps = await res.json();
       if (!maps.length) { container.innerHTML = '<div class="empty">NO MAPS YET.<br/>BE THE FIRST!</div>'; return; }
       container.innerHTML = maps.map(m => `
@@ -839,7 +839,7 @@
   async function loadMyVotes(maps, token) {
     for (const m of maps) {
       try {
-        const res = await fetch(`/api/levels/${m.id}/myvote`, {
+        const res = await fetch(`https://deepfreeze-api.duckdns.org/api/levels/${m.id}/myvote`, {
           headers: { Authorization: 'Bearer ' + token }
         });
         const data = await res.json();
@@ -856,7 +856,7 @@
     const token = localStorage.getItem('token');
     if (!token) { alert('LOGIN REQUIRED TO VOTE'); return; }
     try {
-      const res = await fetch(`/api/levels/${levelId}/vote`, {
+      const res = await fetch(`https://deepfreeze-api.duckdns.org/api/levels/${levelId}/vote`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
         body: JSON.stringify({ vote: voteVal })
@@ -878,7 +878,7 @@
     const token = localStorage.getItem('token');
     if (!token || !el) return;
     try {
-      const res = await fetch('/api/achievements/mine', { headers: { Authorization: 'Bearer ' + token } });
+      const res = await fetch('https://deepfreeze-api.duckdns.org/api/achievements/mine', { headers: { Authorization: 'Bearer ' + token } });
       const data = await res.json();
       el.innerHTML = data.all.map(a => `
         <div class="ach-card ${a.unlocked ? 'unlocked' : 'locked'}">
