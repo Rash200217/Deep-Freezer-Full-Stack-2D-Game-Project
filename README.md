@@ -20,15 +20,23 @@
 
 **Deep Freezer** is a neon-styled, icy arcade platformer where players battle waves of frozen enemies across hand-crafted and community-made levels. Shoot enemies to freeze them into snowballs, then roll those snowballs to shatter them. The game features full online infrastructure — real-time multiplayer communication via SignalR, cloud leaderboards, user authentication, a community level editor with a publish/vote system, and an admin control panel.
 
-![Alt text](image_path_or_url)
+**Video Link: (https://drive.google.com/file/d/1Gmq8oL72KkxsMx_k7jDZE3u7rNN3jAPI/view?usp=sharing)
 
-![Alt text](image_path_or_url)
+<img width="1920" height="922" alt="Image" src="https://github.com/user-attachments/assets/82f4273d-4b7f-493e-a7be-fe2ebdf81885" />
 
-![Alt text](image_path_or_url)
+<img width="1920" height="919" alt="Image" src="https://github.com/user-attachments/assets/20a492ac-f9c9-4334-917a-05a714f2aef0" />
 
-![Alt text](image_path_or_url)
+<img width="1920" height="926" alt="Image" src="https://github.com/user-attachments/assets/c0dee207-d8a7-4dec-81af-efe41eb3be5d" />
 
-![Alt text](image_path_or_url)
+<img width="1920" height="926" alt="Image" src="https://github.com/user-attachments/assets/068f345f-dd82-47af-93ba-ba9056bbcc0f" />
+
+<img width="1918" height="922" alt="Image" src="https://github.com/user-attachments/assets/9445f3b9-a208-4912-a0e7-94f9c99fb250" />
+
+<img width="1918" height="917" alt="Image" src="https://github.com/user-attachments/assets/391d6dd9-9392-4819-b92b-0a8d3ad0f94f" />
+
+<img width="1918" height="917" alt="Image" src="https://github.com/user-attachments/assets/a5cc1082-fd16-46f0-9519-cabdce7d398f" />
+
+<img width="1920" height="917" alt="Image" src="https://github.com/user-attachments/assets/5debb2b7-2fc0-40a0-a507-c17c3c3f2e37" />
 
 > *"Freeze. Roll. Shatter. Repeat."*
 
@@ -413,6 +421,6 @@ This project is licensed under the **MIT License** — see the [LICENSE](LICENSE
 
 <div align="center">
 
-*Made with ❄️ and lots of caffeine.*
+*Made by ❄️ Rashmika Dhananjaya*
 
 </div>
