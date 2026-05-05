@@ -6,7 +6,7 @@
 
 **A full-stack, cloud-connected 2D arcade game — built with Phaser 3, .NET 10, PostgreSQL, SignalR, and gRPC.**
 
-[![Live Game](https://img.shields.io/badge/▶%20Play%20Now-Vercel-black?style=for-the-badge&logo=vercel)](https://deep-freezer-game.vercel.app)
+[![Live Game](https://img.shields.io/badge/▶%20Play%20Now-Vercel-black?style=for-the-badge&logo=vercel)](https://deep-freezer-full-stack-2-d-game-pr.vercel.app/)
 [![Backend API](https://img.shields.io/badge/API-AWS%20App%20Runner-orange?style=for-the-badge&logo=amazonaws)](https://deepfreeze-api.duckdns.org)
 [![License](https://img.shields.io/badge/License-MIT-cyan?style=for-the-badge)](LICENSE)
 [![.NET](https://img.shields.io/badge/.NET-10.0-purple?style=for-the-badge&logo=dotnet)](https://dotnet.microsoft.com)
